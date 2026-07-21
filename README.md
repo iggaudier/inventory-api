@@ -7,5 +7,5 @@
     - [ ] Create products table
     - [ ] Create tags table
     - [ ] Create product_tag table
-- [ ] Install Laravel Bouncer
+- [ ] Install Laravel Spatie
 - [ ] -
