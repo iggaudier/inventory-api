@@ -11,16 +11,13 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('brands', function (Blueprint $table) {
-            $table->id();
+        Schema::table('users', function (Blueprint $table) {
+             // null for super admin
             $table->foreignId('organization_id')
+            ->nullable()
             ->constrained('organizations')
-            ->cascadeOnDelete();
+            ->nullOnDelete();
 
-            $table->string('name');
-            $table->timestamps();
-
-            $table->unique(['organization_id', 'name']);
         });
     }
 
@@ -29,6 +26,8 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('brands');
+        Schema::table('users', function (Blueprint $table) {
+            $table->dropForeign(['organization_id']);
+        });
     }
 };

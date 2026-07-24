@@ -15,27 +15,21 @@ return new class extends Migration
         Schema::create('users', function (Blueprint $table) {
             $table->id();
 
-            // null for super admin
-            $table->foreignId('organization_id')
-            ->nullable()
-            ->constrained('organizations')
-            ->nullOnDelete();
-
             // self-reference: which user created this account
-            $table->foreignId('added_by')
+            $table->foreignId('created_by')
             ->nullable()
             ->constrained('users')
             ->nullOnDelete();
 
             $table->string('name');
             $table->string('email')->unique();
+            $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
-
-            $table->enum('role', UserRole::values())
-            ->default(UserRole::GroupMember->value);
 
             // forces a password change on first login after being created with temporary password
             $table->boolean('must_change_password')->default(true);
+
+            $table->boolean('is_active')->default(true);
             
             $table->rememberToken();
             $table->timestamps();
