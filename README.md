@@ -1,11 +1,9 @@
-- [ ] Create database migrations
-    - [ ] Create users table
-    - [ ] Create organizations table
-    - [ ] Create brands table
-    - [ ] Create categories table
-    - [ ] Create subcategories table
-    - [ ] Create products table
-    - [ ] Create tags table
-    - [ ] Create product_tag table
-- [ ] Install Laravel Spatie
-- [ ] -
+- [x] Create database migrations
+    - [x] Create users table
+    - [x] Create organizations table
+    - [x] Create catalog lookup table
+    - [x] Create products table
+- [x] Install Laravel Spatie
+- [x] Create Seeders
+    - [x] Create super admin seeder
+    - [x] Create role seeder
