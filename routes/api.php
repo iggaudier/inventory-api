@@ -1,8 +1,43 @@
 <?php
 
-use Illuminate\Http\Request;
+use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\CategoryController;
+use App\Http\Controllers\Api\OrganizationController;
+use App\Http\Controllers\Api\ProductController;
+use App\Http\Controllers\Api\SubcategoryController;
+use App\Http\Controllers\Api\UserController;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/user', function (Request $request) {
-    return $request->user();
-})->middleware('auth:sanctum');
+// Public
+Route::post('/login', [AuthController::class, 'login']);
+
+// Authenticated
+Route::middleware('auth:sanctum')->group(function () {
+    Route::post('/logout', [AuthController::class, 'logout']);
+    Route::get('/me', [AuthController::class, 'me']);
+    Route::post('/change-password', [AuthController::class, 'changePassword']);
+
+    // ---- Organizations (Super Admin only) ----
+    Route::middleware('role:super-admin')->group(function () {
+        Route::apiResource('organizations', OrganizationController::class);
+        Route::post('/group-admins', [UserController::class, 'storeGroupAdmin']);
+    });
+
+    // ---- Group Members (Group Admin only) ----
+    Route::middleware('role:group-admin')->group(function () {
+        Route::post('/group-members', [UserController::class, 'storeGroupMember']);
+    });
+
+    // ---- Users (shared, scoped inside the controller/policies) ----
+    Route::get('/users', [UserController::class, 'index']);
+    Route::get('/users/{user}', [UserController::class, 'show']);
+    Route::delete('/users/{user}', [UserController::class, 'destroy']);
+
+    // ---- Products, Categories, Subcategories ----
+    // (Super Admin, Group Admin, Group Member - all scoped to organization)
+    Route::middleware('role:super-admin|group-admin|group-member')->group(function () {
+        Route::apiResource('products', ProductController::class);
+        Route::apiResource('categories', CategoryController::class);
+        Route::apiResource('subcategories', SubcategoryController::class);
+    });
+});
