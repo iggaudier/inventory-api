@@ -7,14 +7,10 @@ use App\Http\Requests\StoreProductRequest;
 use App\Http\Requests\UpdateProductRequest;
 use App\Models\Product;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
 class ProductController extends Controller
 {
-    /**
-     * Super Admin can see any organization's products (optionally filtered).
-     * Group Admin / Group Member see only their own organization's products
-     * -- this is the "shared database" between them.
-     */
     public function index(Request $request)
     {
         $user = $request->user();
@@ -47,8 +43,14 @@ class ProductController extends Controller
         $user = $request->user();
         $organizationId = $user->isSuperAdmin() ? $request->organization_id : $user->organization_id;
 
+        $data = $request->validated();
+
+        if ($request->hasFile('image')) {
+            $data['image_url'] = $this->storeImage($request->file('image'), $organizationId);
+        }
+
         $product = Product::create([
-            ...$request->validated(),
+            ...$data,
             'organization_id' => $organizationId,
             'added_by' => $user->id,
         ]);
@@ -65,7 +67,17 @@ class ProductController extends Controller
 
     public function update(UpdateProductRequest $request, Product $product)
     {
-        $product->fill($request->validated());
+        $data = $request->validated();
+
+        if ($request->hasFile('image')) {
+            if ($product->image_url) {
+                $this->deleteImage($product->image_url);
+            }
+
+            $data['image_url'] = $this->storeImage($request->file('image'), $product->organization_id);
+        }
+
+        $product->fill($data);
         $product->save();
 
         return $product;
@@ -75,8 +87,39 @@ class ProductController extends Controller
     {
         $this->authorize('delete', $product);
 
+        if ($product->image_url) {
+            $this->deleteImage($product->image_url);
+        }
+
         $product->delete();
 
         return response()->json(['message' => 'Product deleted.']);
+    }
+
+    /**
+     * Store an uploaded image on the public disk and return its public URL.
+     */
+    private function storeImage($file, int $organizationId): string
+    {
+        $path = $file->store("products/{$organizationId}", 'public');
+
+        return Storage::disk('public')->url($path);
+    }
+
+    /**
+     * Delete an image given its stored public URL.
+     */
+    private function deleteImage(string $imageUrl): void
+    {
+        $disk = Storage::disk('public');
+        $baseUrl = rtrim(config('app.url'), '/') . '/storage';
+
+        $path = str_starts_with($imageUrl, $baseUrl)
+            ? ltrim(substr($imageUrl, strlen($baseUrl)), '/')
+            : $imageUrl;
+
+        if ($disk->exists($path)) {
+            $disk->delete($path);
+        }
     }
 }
