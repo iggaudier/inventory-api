@@ -68,7 +68,7 @@ class StoreProductRequest extends FormRequest
             'lead_time_days' => ['nullable', 'integer', 'min:0'],
             'in_stock' => ['boolean'],
 
-            'image_url' => ['nullable', 'url', 'max:2048'],
+            'image' => ['nullable', 'image', 'max:5120'],
             'country_origin' => ['nullable', 'string', 'max:100'],
             'vendor_url' => ['nullable', 'url', 'max:2048'],
             'care_instructions' => ['nullable', 'string'],
