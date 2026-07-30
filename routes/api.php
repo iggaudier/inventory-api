@@ -6,11 +6,13 @@ use App\Http\Controllers\Api\OrganizationController;
 use App\Http\Controllers\Api\ProductController;
 use App\Http\Controllers\Api\SubcategoryController;
 use App\Http\Controllers\Api\UserController;
+use App\Http\Controllers\RequestAccessController;
 use Illuminate\Support\Facades\Route;
 
 // Public
 Route::post('/login', [AuthController::class, 'login']);
-
+// Add this alongside your other api routes
+Route::post('/request-access', [RequestAccessController::class, 'store']);
 // Authenticated
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);

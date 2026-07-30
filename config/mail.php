@@ -115,4 +115,6 @@ return [
         'name' => env('MAIL_FROM_NAME', env('APP_NAME', 'Laravel')),
     ],
 
+    'request_access_recipient' => env('REQUEST_ACCESS_RECIPIENT'),
+
 ];
