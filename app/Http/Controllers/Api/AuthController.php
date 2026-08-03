@@ -38,6 +38,7 @@ class AuthController extends Controller
                 'email' => $user->email,
                 'role' => $user->getRoleNames()->first(),
                 'organization_id' => $user->organization_id,
+                'must_change_password' => $user->must_change_password,
             ],
         ]);
     }

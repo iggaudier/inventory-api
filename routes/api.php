@@ -19,6 +19,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/me', [AuthController::class, 'me']);
     Route::post('/change-password', [AuthController::class, 'changePassword']);
 
+    Route::middleware('password.changed')->group(function () {
     // ---- Organizations (Super Admin only) ----
     Route::middleware('role:super-admin')->group(function () {
         Route::apiResource('organizations', OrganizationController::class);
@@ -41,5 +42,6 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::apiResource('products', ProductController::class);
         Route::apiResource('categories', CategoryController::class);
         Route::apiResource('subcategories', SubcategoryController::class);
+    });
     });
 });
