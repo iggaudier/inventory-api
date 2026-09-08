@@ -30,10 +30,22 @@ class ProductController extends Controller
         }
 
         if ($request->filled('search')) {
-            $search = $request->search;
-            $query->where(fn ($q) => $q->where('name', 'like', "%{$search}%")
-                ->orWhere('sku', 'like', "%{$search}%"));
-        }
+        $search = $request->search;
+
+        $query->where(function ($q) use ($search) {
+            $q->where('name', 'like', "%{$search}%")
+                ->orWhere('sku', 'like', "%{$search}%")
+                ->orWhereHas('category', function ($q) use ($search) {
+                    $q->where('name', 'like', "%{$search}%");
+                })
+                ->orWhereHas('subcategory', function ($q) use ($search) {
+                    $q->where('name', 'like', "%{$search}%");
+                })
+                ->orWhereHas('brand', function ($q) use ($search) {
+                    $q->where('name', 'like', "%{$search}%");
+                });
+        });
+    }
 
         return $query->paginate(20);
     }
@@ -62,7 +74,7 @@ class ProductController extends Controller
     {
         $this->authorize('view', $product);
 
-        return $product->load(['category', 'subcategory', 'brand', 'addedBy:id,name']);
+        return $product->load(['category', 'subcategory', 'brand', 'organization:id,name', 'addedBy:id,name']);
     }
 
     public function update(UpdateProductRequest $request, Product $product)
