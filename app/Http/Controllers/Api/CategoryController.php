@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreCategoryRequest;
 use App\Models\Category;
 use Illuminate\Http\Request;
+use App\Traits\ApiResponses;
 
 class CategoryController extends Controller
 {
@@ -13,6 +14,7 @@ class CategoryController extends Controller
      * List categories. Super Admin may pass ?organization_id=, everyone
      * else only ever sees their own organization's categories.
      */
+    use ApiResponses;
     public function index(Request $request)
     {
         $user = $request->user();
@@ -27,7 +29,7 @@ class CategoryController extends Controller
             $query->where('organization_id', $user->organization_id);
         }
 
-        return $query->get();
+        return $this->ok('Categories retrieved successfully.', $query->get());
     }
 
     public function store(StoreCategoryRequest $request)

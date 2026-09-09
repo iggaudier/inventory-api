@@ -59,7 +59,10 @@ class DemoDataSeeder extends Seeder
             $groupMember->assignRole('group-member');
         }
 
-        $brand = Brand::firstOrCreate(['name' => 'Acme Furniture Co.']);
+        $brand = Brand::firstOrCreate(
+            ['name' => 'Acme Furniture Co.', 'organization_id' => $organization->id],
+            ['created_by' => $groupAdmin->id]
+        );
 
         $category = Category::firstOrCreate(
             ['organization_id' => $organization->id, 'name' => 'Furniture'],

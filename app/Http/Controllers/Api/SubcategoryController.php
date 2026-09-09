@@ -6,9 +6,11 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreSubcategoryRequest;
 use App\Models\Subcategory;
 use Illuminate\Http\Request;
+use App\Traits\ApiResponses;
 
 class SubcategoryController extends Controller
 {
+    use ApiResponses;
     public function index(Request $request)
     {
         $user = $request->user();
@@ -27,7 +29,7 @@ class SubcategoryController extends Controller
             $query->where('category_id', $request->category_id);
         }
 
-        return $query->get();
+        return $this->ok('Subcategories retrieved successfully.', $query->get());
     }
 
     public function store(StoreSubcategoryRequest $request)

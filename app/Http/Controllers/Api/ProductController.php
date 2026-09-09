@@ -8,9 +8,11 @@ use App\Http\Requests\UpdateProductRequest;
 use App\Models\Product;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use App\Traits\ApiResponses;
 
 class ProductController extends Controller
 {
+    use ApiResponses;
     public function index(Request $request)
     {
         $user = $request->user();
@@ -27,6 +29,14 @@ class ProductController extends Controller
 
         if ($request->filled('category_id')) {
             $query->where('category_id', $request->category_id);
+        }
+
+        if ($request->filled('subcategory_id')) {
+            $query->where('subcategory_id', $request->subcategory_id);
+        }
+
+        if ($request->filled('brand_id')) {
+            $query->where('brand_id', $request->brand_id);
         }
 
         if ($request->filled('search')) {
@@ -47,7 +57,9 @@ class ProductController extends Controller
         });
     }
 
-        return $query->paginate(20);
+        $products = $query->paginate($request->input('per_page', 20));
+
+        return $this->ok('Products retrieved successfully', $products);
     }
 
     public function store(StoreProductRequest $request)
@@ -67,7 +79,7 @@ class ProductController extends Controller
             'added_by' => $user->id,
         ]);
 
-        return response()->json($product, 201);
+        return $this->created('Product created successfully', $product);
     }
 
     public function show(Product $product)
@@ -105,7 +117,7 @@ class ProductController extends Controller
 
         $product->delete();
 
-        return response()->json(['message' => 'Product deleted.']);
+        return $this->ok('Product deleted successfully', $product);
     }
 
     /**

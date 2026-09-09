@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\BrandController;
 use App\Http\Controllers\Api\CategoryController;
 use App\Http\Controllers\Api\OrganizationController;
 use App\Http\Controllers\Api\ProductController;
@@ -36,12 +37,13 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/users/{user}', [UserController::class, 'show']);
     Route::delete('/users/{user}', [UserController::class, 'destroy']);
 
-    // ---- Products, Categories, Subcategories ----
+    // ---- Products, Categories, Subcategories, Brands ----
     // (Super Admin, Group Admin, Group Member - all scoped to organization)
     Route::middleware('role:super-admin|group-admin|group-member')->group(function () {
         Route::apiResource('products', ProductController::class);
         Route::apiResource('categories', CategoryController::class);
         Route::apiResource('subcategories', SubcategoryController::class);
+        Route::apiResource('brands', BrandController::class);
     });
     });
 });
