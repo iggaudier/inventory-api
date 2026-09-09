@@ -38,7 +38,10 @@ class UpdateProductRequest extends FormRequest
                     }
                 }),
             ],
-            'brand_id' => ['nullable', 'integer', 'exists:brands,id'],
+            'brand_id' => [
+                'nullable', 'integer',
+                Rule::exists('brands', 'id')->where(fn ($query) => $query->where('organization_id', $organizationId)),
+            ],
 
             'description' => ['nullable', 'string'],
             'material' => ['nullable', 'string', 'max:255'],
