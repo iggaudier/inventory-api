@@ -45,7 +45,34 @@ class OrganizationController extends Controller
         $organization->fill($request->only(['name', 'is_active']));
         $organization->save();
 
-        return $organization;
+        return response()->json($organization, 200);
+    }
+
+    // For Group Admins to update their own organization's name
+    public function updateOwnName(Request $request)
+    {
+        $request->validate([
+            'name' => [
+                'required',
+                'string',
+                'max:255',
+                'unique:organizations,name,' . $request->user()->organization_id,
+            ],
+        ]);
+
+        $organization = $request->user()->organization;
+
+        if (!$organization) {
+            return response()->json([
+                'message' => 'Organization not found.'
+            ], 404);
+        }
+
+        $organization->update([
+            'name' => $request->name,
+        ]);
+
+        return response()->json($organization, 200);
     }
 
     public function destroy(Organization $organization)
