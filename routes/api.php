@@ -31,7 +31,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::middleware('role:group-admin')->group(function () {
         Route::post('/group-members', [UserController::class, 'storeGroupMember']);
 
-        Route::patch('/organizations/name}', [OrganizationController::class, 'updateOwnName']);
+        Route::patch('/organizations/name', [OrganizationController::class, 'updateOwnName']);
     });
 
     // ---- Users (shared, scoped inside the controller/policies) ----
