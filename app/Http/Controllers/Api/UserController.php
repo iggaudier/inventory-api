@@ -8,6 +8,7 @@ use App\Http\Requests\StoreGroupMemberRequest;
 use App\Models\Organization;
 use App\Models\User;
 use App\Notifications\TemporaryPasswordNotification;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 
@@ -18,19 +19,46 @@ class UserController extends Controller
      * organization). Group Admin / Group Member see only their own
      * organization's users.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $user = auth()->user();
+        $user = $request->user();
 
-        $query = User::query()->with('organization:id,name')->whereNot('id', $user->id);
+        $query = User::query()->with(['organization:id,name', 'roles:id,name']);
 
         if (! $user->isSuperAdmin()) {
-            $query->where('organization_id', $user->organization_id);
-        } elseif (request()->filled('organization_id')) {
-            $query->where('organization_id', request('organization_id'));
+            $query->where('organization_id', $user->organization_id)->whereNot('id', $user->id);
+        } elseif ($request->filled('organization_id')) {
+            $query->where('organization_id', $request->organization_id);
         }
 
-        return $query->paginate(20);
+        if ($request->filled('search')) {
+            $search = $request->string('search')->trim();
+            $query->where(fn ($query) => $query
+                ->where('name', 'like', "%{$search}%")
+                ->orWhere('email', 'like', "%{$search}%"));
+        }
+
+        return $query->orderBy('name')->paginate(20);
+    }
+
+    /** List the authenticated Group Admin's organization accounts, excluding themselves. */
+    public function groupMembers(Request $request)
+    {
+        $admin = $request->user();
+        $query = User::query()
+            ->with(['organization:id,name', 'roles:id,name'])
+            ->where('organization_id', $admin->organization_id)
+            ->whereNot('id', $admin->id)
+            ->whereHas('roles', fn ($query) => $query->whereIn('name', ['group-admin', 'group-member']));
+
+        if ($request->filled('search')) {
+            $search = $request->string('search')->trim();
+            $query->where(fn ($query) => $query
+                ->where('name', 'like', "%{$search}%")
+                ->orWhere('email', 'like', "%{$search}%"));
+        }
+
+        return $query->orderBy('name')->paginate(20);
     }
 
     /**
