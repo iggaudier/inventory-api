@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreGroupAdminRequest;
 use App\Http\Requests\StoreGroupMemberRequest;
+use App\Http\Requests\StoreUserRequest;
 use App\Models\Organization;
 use App\Models\User;
 use App\Notifications\TemporaryPasswordNotification;
@@ -63,6 +64,10 @@ class UserController extends Controller
 
     /**
      * Super Admin creates a Group Admin for a given organization.
+     *
+     * Kept as-is for whatever existing flow already calls it. New code
+     * (the "Add New User" form on the All Users page) should use
+     * storeUser() below instead, since it supports picking a role too.
      */
     public function storeGroupAdmin(StoreGroupAdminRequest $request)
     {
@@ -105,6 +110,32 @@ class UserController extends Controller
         $member->notify(new TemporaryPasswordNotification($temporaryPassword, $admin->organization->name));
 
         return response()->json($member->load('organization:id,name'), 201);
+    }
+
+    /**
+     * Super Admin creates a user for ANY organization, with EITHER role
+     * (group-admin or group-member) — used by the "Add New User" form
+     * on the All Users page, where the org and role are both chosen
+     * in the UI rather than being implied by who's logged in.
+     */
+    public function storeUser(StoreUserRequest $request)
+    {
+        $organization = Organization::findOrFail($request->organization_id);
+        $temporaryPassword = Str::password(12);
+
+        $newUser = User::create([
+            'name' => $request->name,
+            'email' => $request->email,
+            'password' => Hash::make($temporaryPassword),
+            'organization_id' => $organization->id,
+            'created_by' => $request->user()->id,
+            'must_change_password' => true,
+        ]);
+
+        $newUser->assignRole($request->role);
+        $newUser->notify(new TemporaryPasswordNotification($temporaryPassword, $organization->name));
+
+        return response()->json($newUser->load(['organization:id,name', 'roles:id,name']), 201);
     }
 
     public function show(User $user)
