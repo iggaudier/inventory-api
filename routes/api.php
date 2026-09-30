@@ -25,6 +25,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::middleware('role:super-admin')->group(function () {
         Route::apiResource('organizations', OrganizationController::class);
         Route::post('/group-admins', [UserController::class, 'storeGroupAdmin']);
+        Route::post('/users', [UserController::class, 'storeUser']);
     });
 
     // ---- Group Members (Group Admin only) ----

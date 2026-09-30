@@ -37,7 +37,7 @@ class TemporaryPasswordNotification extends Notification implements ShouldQueue
             ->line("Email: {$notifiable->email}")
             ->line("Temporary Password: {$this->temporaryPassword}")
             ->line('You will be required to change this password the first time you log in.')
-            ->action('Log In', url(config('app.frontend_url', config('app.url')) . '/auth/login'))
+            ->action('Log In', url(config('app.frontend_url', config('app.url'))))
             ->line('If you did not expect this account, please contact your administrator.');
     }
 }
