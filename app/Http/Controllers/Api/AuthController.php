@@ -27,6 +27,13 @@ class AuthController extends Controller
             ], 403);
         }
 
+        //Check organization status
+        if ($user->organization && ! $user->organization->is_active){
+            return response()->json([
+                'message' => 'Your organization has been deactivated.',
+            ], 403);
+        }
+
         $token = $user->createToken('api-token')->plainTextToken;
 
         return response()->json([
