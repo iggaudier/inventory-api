@@ -5,16 +5,34 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreOrganizationRequest;
 use App\Models\Organization;
+use App\Traits\ApiResponses;
 use Illuminate\Http\Request;
 
 class OrganizationController extends Controller
 {
+    use ApiResponses;
 
-    public function index()
+    public function index(Request $request)
     {
         $this->authorize('viewAny', Organization::class);
 
-        return Organization::withCount('users', 'products')->paginate(20);
+        $query = Organization::withCount(['users', 'products']);
+
+        if ($request->filled('search')) {
+            $search = $request->string('search')->trim();
+            $query->where('name', 'like', "%{$search}%");
+        }
+
+        if ($request->filled('is_active')) {
+            $query->where('is_active', $request->boolean('is_active'));
+        }
+
+        $perPage = $request->integer('per_page', 20);
+
+        return $this->ok(
+            'Organizations retrieved successfully',
+            $query->orderBy('name')->paginate($perPage)
+        );
     }
 
     public function store(StoreOrganizationRequest $request)
@@ -23,14 +41,17 @@ class OrganizationController extends Controller
 
         $organization = Organization::create($request->validated());
 
-        return response()->json($organization, 201);
+        return $this->created('Organization created successfully', $organization);
     }
 
     public function show(Organization $organization)
     {
         $this->authorize('view', $organization);
 
-        return $organization->load(['users:id,name,email,organization_id']);
+        return $this->ok(
+            'Organization retrieved successfully',
+            $organization->load(['users:id,name,email,organization_id'])
+        );
     }
 
     public function update(Request $request, Organization $organization)
@@ -45,7 +66,7 @@ class OrganizationController extends Controller
         $organization->fill($request->only(['name', 'is_active']));
         $organization->save();
 
-        return response()->json($organization, 200);
+        return $this->ok('Organization updated successfully', $organization);
     }
 
     // For Group Admins to update their own organization's name
@@ -63,16 +84,14 @@ class OrganizationController extends Controller
         $organization = $request->user()->organization;
 
         if (!$organization) {
-            return response()->json([
-                'message' => 'Organization not found.'
-            ], 404);
+            return $this->error('Organization not found.', 404);
         }
 
         $organization->update([
             'name' => $request->name,
         ]);
 
-        return response()->json($organization, 200);
+        return $this->ok('Organization name updated successfully', $organization);
     }
 
     public function destroy(Organization $organization)
@@ -81,6 +100,6 @@ class OrganizationController extends Controller
 
         $organization->delete();
 
-        return response()->json(['message' => 'Organization deleted.']);
+        return $this->ok('Organization deleted successfully');
     }
 }
