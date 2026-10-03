@@ -19,6 +19,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'permission' => \Spatie\Permission\Middleware\PermissionMiddleware::class,
             'role_or_permission' => \Spatie\Permission\Middleware\RoleOrPermissionMiddleware::class,
             'password.changed' => \App\Http\Middleware\EnsurePasswordChanged::class,
+            'organization.active' => \App\Http\Middleware\EnsureOrganizationIsActive::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
