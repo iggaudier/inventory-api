@@ -33,13 +33,13 @@ Route::middleware(['auth:sanctum', 'organization.active'])->group(function () {
         Route::middleware('role:group-admin')->group(function () {
             Route::get('/group-members', [UserController::class, 'groupMembers']);
             Route::post('/group-members', [UserController::class, 'storeGroupMember']);
-
             Route::patch('/organizations/name', [OrganizationController::class, 'updateOwnName']);
         });
 
         // ---- Users ----
         Route::get('/users', [UserController::class, 'index']);
         Route::get('/users/{user}', [UserController::class, 'show']);
+        Route::put('/users/{user}', [UserController::class, 'update']);
         Route::delete('/users/{user}', [UserController::class, 'destroy']);
 
         // ---- Products, Categories, Subcategories, Brands ----

@@ -12,6 +12,7 @@ use App\Notifications\TemporaryPasswordNotification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
+use Illuminate\Validation\Rule;
 
 class UserController extends Controller
 {
@@ -143,6 +144,41 @@ class UserController extends Controller
         $this->authorize('view', $user);
 
         return $user->load('organization:id,name');
+    }
+
+    /**
+     * Update a user's name/email, and toggle is_active — this is what
+     * powers the inline status toggle on Group Members (a Group Admin
+     * flipping their own org's members active/inactive) and, for a
+     * Super Admin, editing any user's name/email/status. Who's allowed
+     * to touch whom is enforced by UserPolicy::update(); which FIELDS
+     * they're allowed to send is enforced right here, per role.
+     */
+    public function update(Request $request, User $user)
+    {
+        $this->authorize('update', $user);
+
+        $actor = $request->user();
+
+        if ($actor->isSuperAdmin()) {
+            $data = $request->validate([
+                'name' => ['sometimes', 'required', 'string', 'max:255'],
+                'email' => ['sometimes', 'required', 'email', 'max:255', Rule::unique('users', 'email')->ignore($user->id)],
+                'is_active' => ['sometimes', 'boolean'],
+            ]);
+        } else {
+            // Group Admin may only toggle status — never rename or
+            // change another user's email, even if those fields are
+            // present in the request body.
+            $data = $request->validate([
+                'is_active' => ['required', 'boolean'],
+            ]);
+        }
+
+        $user->fill($data);
+        $user->save();
+
+        return $user->load(['organization:id,name', 'roles:id,name']);
     }
 
     public function destroy(User $user)
