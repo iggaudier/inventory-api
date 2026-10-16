@@ -3,6 +3,7 @@
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\BrandController;
 use App\Http\Controllers\Api\CategoryController;
+use App\Http\Controllers\Api\DashboardController;
 use App\Http\Controllers\Api\OrganizationController;
 use App\Http\Controllers\Api\ProductController;
 use App\Http\Controllers\Api\SubcategoryController;
@@ -44,6 +45,7 @@ Route::middleware(['auth:sanctum', 'organization.active'])->group(function () {
 
         // ---- Products, Categories, Subcategories, Brands ----
         Route::middleware('role:super-admin|group-admin|group-member')->group(function () {
+            Route::get('/dashboard', [DashboardController::class, 'index']);
             Route::apiResource('products', ProductController::class);
             Route::apiResource('categories', CategoryController::class);
             Route::apiResource('subcategories', SubcategoryController::class);
