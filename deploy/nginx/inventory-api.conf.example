@@ -1,0 +1,48 @@
+# Replace api.example.duckdns.org and the PHP-FPM socket version before use.
+# This file deliberately serves only Laravel's /public directory.
+
+server {
+    listen 80;
+    listen [::]:80;
+    server_name api.example.duckdns.org;
+
+    root /var/www/inventory-api/current/public;
+    location ^~ /.well-known/acme-challenge/ { allow all; }
+    location / { return 301 https://$host$request_uri; }
+}
+
+server {
+    listen 443 ssl http2;
+    listen [::]:443 ssl http2;
+    server_name api.example.duckdns.org;
+
+    root /var/www/inventory-api/current/public;
+    index index.php;
+    client_max_body_size 10m;
+
+    ssl_certificate /etc/letsencrypt/live/api.example.duckdns.org/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/api.example.duckdns.org/privkey.pem;
+    include /etc/letsencrypt/options-ssl-nginx.conf;
+    ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem;
+
+    add_header X-Content-Type-Options "nosniff" always;
+    add_header X-Frame-Options "SAMEORIGIN" always;
+    add_header Referrer-Policy "strict-origin-when-cross-origin" always;
+    add_header Strict-Transport-Security "max-age=31536000; includeSubDomains" always;
+
+    location / {
+        try_files $uri $uri/ /index.php?$query_string;
+    }
+
+    location ~ \.php$ {
+        try_files $uri =404;
+        include fastcgi_params;
+        fastcgi_param SCRIPT_FILENAME $realpath_root$fastcgi_script_name;
+        fastcgi_param DOCUMENT_ROOT $realpath_root;
+        fastcgi_param HTTPS on;
+        fastcgi_pass unix:/run/php/php8.4-fpm.sock;
+        fastcgi_read_timeout 60s;
+    }
+
+    location ~ /\. { deny all; }
+}

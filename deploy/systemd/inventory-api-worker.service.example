@@ -1,0 +1,17 @@
+[Unit]
+Description=Lily Inventory Laravel queue worker
+After=network.target mariadb.service
+
+[Service]
+Type=simple
+User=www-data
+Group=www-data
+WorkingDirectory=/var/www/inventory-api/current
+ExecStart=/usr/bin/php artisan queue:work database --sleep=3 --tries=3 --max-time=3600
+Restart=always
+RestartSec=5
+KillSignal=SIGTERM
+TimeoutStopSec=90
+
+[Install]
+WantedBy=multi-user.target
