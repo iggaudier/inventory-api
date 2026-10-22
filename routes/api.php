@@ -12,8 +12,8 @@ use App\Http\Controllers\RequestAccessController;
 use Illuminate\Support\Facades\Route;
 
 // Public
-Route::post('/login', [AuthController::class, 'login']);
-Route::post('/request-access', [RequestAccessController::class, 'store']);
+Route::post('/login', [AuthController::class, 'login'])->middleware('throttle:5,1');
+Route::post('/request-access', [RequestAccessController::class, 'store'])->middleware('throttle:5,1');
 
 // Authenticated
 Route::middleware(['auth:sanctum', 'organization.active'])->group(function () {
