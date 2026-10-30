@@ -64,7 +64,7 @@ After each code deploy, repeat `composer install`, `migrate --force`, `optimize`
 
 ## Database resilience
 
-The database lives on a single EC2 disk, so it is not highly available. Schedule a daily `mysqldump --single-transaction` to a directory outside the release path and retain it off-instance (for example, encrypted S3). Also schedule EBS snapshots. Test restoring a dump into a separate database before relying on the backups. Database backups are required before migrations; no deployment command should drop or recreate the production database.
+The database and uploaded announcement media live on a single EC2 disk, so they are not highly available. Schedule a daily `mysqldump --single-transaction` and back up `storage/app/public` to a directory outside the release path; retain both off-instance (for example, encrypted S3). Also schedule EBS snapshots. Test restoring a dump and the uploaded-media directory before relying on the backups. Database backups are required before migrations; no deployment command should drop or recreate the production database.
 
 ## Vercel configuration
 

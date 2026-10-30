@@ -10,6 +10,13 @@ return new class extends Migration
      */
     public function up(): void
     {
+        // The production migration is MySQL/MariaDB-specific (ALTER ... MODIFY
+        // and a BEFORE INSERT trigger). SQLite is only used by the automated
+        // test suite; Organization::booted already supplies a slug there.
+        if (DB::getDriverName() === 'sqlite') {
+            return;
+        }
+
         DB::statement(
             'UPDATE `organizations` SET `slug` = CONCAT(LOWER(REPLACE(`name`, " ", "-")), "-", LPAD(FLOOR(RAND() * 100000), 5, "0"))'
             . ' WHERE `slug` IS NULL OR `slug` = "";'
@@ -36,6 +43,10 @@ SQL
      */
     public function down(): void
     {
+        if (DB::getDriverName() === 'sqlite') {
+            return;
+        }
+
         DB::statement('DROP TRIGGER IF EXISTS `organizations_before_insert_slug`;');
         DB::statement('ALTER TABLE `organizations` MODIFY `slug` VARCHAR(255) NOT NULL;');
     }

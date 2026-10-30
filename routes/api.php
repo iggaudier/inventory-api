@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\AnnouncementController;
 use App\Http\Controllers\Api\BrandController;
 use App\Http\Controllers\Api\CategoryController;
 use App\Http\Controllers\Api\DashboardController;
@@ -23,8 +24,14 @@ Route::middleware(['auth:sanctum', 'organization.active'])->group(function () {
 
     Route::middleware('password.changed')->group(function () {
 
+        // Every authenticated user may read the announcement feed.
+        Route::get('/announcements', [AnnouncementController::class, 'index']);
+
         // ---- Organizations (Super Admin only) ----
         Route::middleware('role:super-admin')->group(function () {
+            Route::post('/announcements', [AnnouncementController::class, 'store']);
+            Route::put('/announcements/{announcement}', [AnnouncementController::class, 'update']);
+            Route::delete('/announcements/{announcement}', [AnnouncementController::class, 'destroy']);
             Route::apiResource('organizations', OrganizationController::class);
             Route::post('/group-admins', [UserController::class, 'storeGroupAdmin']);
             Route::post('/users', [UserController::class, 'storeUser']);

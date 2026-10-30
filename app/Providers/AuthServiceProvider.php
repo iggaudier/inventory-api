@@ -3,12 +3,14 @@
 namespace App\Providers;
 
 use App\Models\Category;
+use App\Models\Announcement;
 use App\Models\Brand;
 use App\Models\Organization;
 use App\Models\Product;
 use App\Models\Subcategory;
 use App\Models\User;
 use App\Policies\CategoryPolicy;
+use App\Policies\AnnouncementPolicy;
 use App\Policies\BrandPolicy;
 use App\Policies\OrganizationPolicy;
 use App\Policies\ProductPolicy;
@@ -19,6 +21,7 @@ use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvid
 class AuthServiceProvider extends ServiceProvider
 {
     protected $policies = [
+        Announcement::class => AnnouncementPolicy::class,
         Organization::class => OrganizationPolicy::class,
         Product::class => ProductPolicy::class,
         User::class => UserPolicy::class,
