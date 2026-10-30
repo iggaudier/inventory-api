@@ -18,7 +18,8 @@ server {
 
     root /var/www/inventory-api/current/public;
     index index.php;
-    client_max_body_size 10m;
+    # Announcement video uploads are validated by Laravel at 20 MiB.
+    client_max_body_size 25m;
 
     ssl_certificate /etc/letsencrypt/live/api.example.duckdns.org/fullchain.pem;
     ssl_certificate_key /etc/letsencrypt/live/api.example.duckdns.org/privkey.pem;
