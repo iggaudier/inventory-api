@@ -6,8 +6,13 @@ This application uses a bearer token in the `Authorization` header. The frontend
 
 1. Point your DuckDNS hostname (for example, `api.example.duckdns.org`) at the EC2 public IP. Install the DuckDNS updater using its official instructions. An Elastic IP is still recommended so an EC2 stop/start does not create an outage.
 2. In the EC2 security group, allow TCP 80 and 443 from the internet, and SSH (22) only from your own fixed IP. Do **not** allow TCP 3306, PHP-FPM, or Redis from the internet.
-3. Install Nginx, PHP 8.4 with the extensions required by Laravel (`curl`, `mbstring`, `xml`, `zip`, `mysql`, `bcmath`, `intl`), Composer, MariaDB/MySQL, and Certbot.
-4. Configure MariaDB to bind to `127.0.0.1` only. Create a dedicated least-privilege application user; do not run Laravel as `root`.
+3. Install Nginx, PHP 8.4 with the extensions required by Laravel (`curl`, `mbstring`, `xml`, `zip`, `mysql`, `bcmath`, `intl`), Composer, MySQL 8.x, and Certbot. Run `sudo mysql_secure_installation` after installing MySQL.
+4. Configure MySQL to bind to `127.0.0.1` only. In `/etc/mysql/mysql.conf.d/mysqld.cnf`, set:
+
+   bind-address = 127.0.0.1
+   mysqlx-bind-address = 127.0.0.1
+
+   Then run `sudo systemctl restart mysql`. Create a dedicated least-privilege application user; do not run Laravel as `root`.
 
 ```sql
 CREATE DATABASE inventory_db CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
