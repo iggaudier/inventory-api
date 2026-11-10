@@ -5,6 +5,7 @@ use App\Http\Controllers\Api\AnnouncementController;
 use App\Http\Controllers\Api\BrandController;
 use App\Http\Controllers\Api\CategoryController;
 use App\Http\Controllers\Api\DashboardController;
+use App\Http\Controllers\Api\FeedbackController;
 use App\Http\Controllers\Api\OrganizationController;
 use App\Http\Controllers\Api\ProductController;
 use App\Http\Controllers\Api\SubcategoryController;
@@ -23,6 +24,9 @@ Route::middleware(['auth:sanctum', 'organization.active'])->group(function () {
     Route::post('/change-password', [AuthController::class, 'changePassword']);
 
     Route::middleware('password.changed')->group(function () {
+
+        // Every signed-in user can send feedback to the configured support inbox.
+        Route::post('/feedback', [FeedbackController::class, 'store'])->middleware('throttle:5,1');
 
         // Every authenticated user may read the announcement feed.
         Route::get('/announcements', [AnnouncementController::class, 'index']);

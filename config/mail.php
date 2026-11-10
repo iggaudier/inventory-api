@@ -117,4 +117,7 @@ return [
 
     'request_access_recipient' => env('REQUEST_ACCESS_RECIPIENT'),
 
+    // Falls back to the access-request inbox when a separate feedback inbox is not configured.
+    'feedback_recipient' => env('FEEDBACK_RECIPIENT', env('REQUEST_ACCESS_RECIPIENT')),
+
 ];
