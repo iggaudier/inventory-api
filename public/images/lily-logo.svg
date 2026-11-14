@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 512 512">
+  <title>Leaf L logo</title>
+  <rect x="38" y="38" width="436" height="436" rx="82" fill="#26352B"/>
+  <!-- Geometric letter L -->
+  <path d="M151 126
+           Q151 116 161 116
+           H174
+           Q184 116 184 126
+           V345
+           H226
+           V386
+           H161
+           Q151 386 151 376 Z"
+        fill="#F7F5EF"/>
+  <!-- Leaf mark -->
+  <path d="M250 386
+           C258 313 315 229 401 211
+           C400 293 348 370 250 386 Z"
+        fill="#D8B77B"/>
+</svg>
