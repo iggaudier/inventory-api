@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\ChangePasswordRequest;
 use App\Http\Requests\LoginRequest;
+use App\Http\Requests\UpdateAccountRequest;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -45,6 +46,7 @@ class AuthController extends Controller
                 'email' => $user->email,
                 'role' => $user->getRoleNames()->first(),
                 'organization_id' => $user->organization_id,
+                'organization_name' => $user->organization?->name,
                 'must_change_password' => $user->must_change_password,
             ],
         ]);
@@ -75,6 +77,22 @@ class AuthController extends Controller
         return response()->json(['message' => 'Password updated successfully.']);
     }
 
+    public function updateAccount(UpdateAccountRequest $request)
+    {
+        $user = $request->user();
+        $user->update($request->validated());
+
+        return response()->json([
+            'id' => $user->id,
+            'name' => $user->name,
+            'email' => $user->email,
+            'role' => $user->getRoleNames()->first(),
+            'organization_id' => $user->organization_id,
+            'organization_name' => $user->organization?->name,
+            'must_change_password' => $user->must_change_password,
+        ]);
+    }
+
     public function me()
     {
         $user = Auth::user();
@@ -85,6 +103,7 @@ class AuthController extends Controller
             'email' => $user->email,
             'role' => $user->getRoleNames()->first(),
             'organization_id' => $user->organization_id,
+            'organization_name' => $user->organization?->name,
             'must_change_password' => $user->must_change_password,
         ]);
     }

@@ -60,10 +60,16 @@ class DashboardController extends Controller
             $summary['users'] = User::where('organization_id', $user->organization_id)->count();
         }
 
-        return $this->ok('Dashboard retrieved successfully', [
+        $dashboard = [
             'summary' => $summary,
             'category_mix' => $categoryMix,
             'recent_products' => $recentProducts,
-        ]);
+        ];
+
+        if (! $user->isSuperAdmin()) {
+            $dashboard['organization'] = $user->organization?->only(['id', 'name']);
+        }
+
+        return $this->ok('Dashboard retrieved successfully', $dashboard);
     }
 }

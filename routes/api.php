@@ -25,11 +25,16 @@ Route::middleware(['auth:sanctum', 'organization.active'])->group(function () {
 
     Route::middleware('password.changed')->group(function () {
 
+        Route::patch('/account', [AuthController::class, 'updateAccount']);
+
         // Every signed-in user can send feedback to the configured support inbox.
         Route::post('/feedback', [FeedbackController::class, 'store'])->middleware('throttle:5,1');
 
         // Every authenticated user may read the announcement feed.
         Route::get('/announcements', [AnnouncementController::class, 'index']);
+
+        // This exact route must precede /organizations/{organization}.
+        Route::patch('/organizations/name', [OrganizationController::class, 'updateOwnName'])->middleware('role:group-admin');
 
         // ---- Organizations (Super Admin only) ----
         Route::middleware('role:super-admin')->group(function () {
@@ -45,7 +50,6 @@ Route::middleware(['auth:sanctum', 'organization.active'])->group(function () {
         Route::middleware('role:group-admin')->group(function () {
             Route::get('/group-members', [UserController::class, 'groupMembers']);
             Route::post('/group-members', [UserController::class, 'storeGroupMember']);
-            Route::patch('/organizations/name', [OrganizationController::class, 'updateOwnName']);
         });
 
         // ---- Users ----
