@@ -1,7 +1,7 @@
 <?php
 
-use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\AnnouncementController;
+use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\BrandController;
 use App\Http\Controllers\Api\CategoryController;
 use App\Http\Controllers\Api\DashboardController;
@@ -32,6 +32,8 @@ Route::middleware(['auth:sanctum', 'organization.active'])->group(function () {
 
         // Every authenticated user may read the announcement feed.
         Route::get('/announcements', [AnnouncementController::class, 'index']);
+        Route::get('/announcements/unread-count', [AnnouncementController::class, 'unreadCount']);
+        Route::post('/announcements/{announcement}/read', [AnnouncementController::class, 'markRead']);
 
         // This exact route must precede /organizations/{organization}.
         Route::patch('/organizations/name', [OrganizationController::class, 'updateOwnName'])->middleware('role:group-admin');
