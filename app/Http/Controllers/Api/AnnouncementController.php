@@ -26,6 +26,26 @@ class AnnouncementController extends Controller
         return $this->ok('Announcements retrieved successfully', $announcements);
     }
 
+    public function unreadCount(Request $request)
+    {
+        $this->authorize('viewAny', Announcement::class);
+
+        $count = Announcement::whereDoesntHave('readers', fn ($query) => $query->where('users.id', $request->user()->id))->count();
+
+        return $this->ok('Unread announcement count retrieved successfully', ['count' => $count]);
+    }
+
+    public function markRead(Request $request, Announcement $announcement)
+    {
+        $this->authorize('viewAny', Announcement::class);
+
+        $announcement->readers()->syncWithoutDetaching([
+            $request->user()->id => ['read_at' => now()],
+        ]);
+
+        return $this->ok('Announcement marked as read');
+    }
+
     public function store(StoreAnnouncementRequest $request)
     {
         $this->authorize('create', Announcement::class);

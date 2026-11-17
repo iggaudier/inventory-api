@@ -103,3 +103,35 @@ test('a super admin can edit and delete an announcement with its media', functio
     $this->assertDatabaseMissing('announcements', ['id' => $announcement->id]);
     Storage::disk('public')->assertMissing($newPath);
 });
+
+test('unread announcements are tracked per user and only viewed announcements are cleared', function () {
+    $author = announcementUser('super-admin');
+    $reader = announcementUser('group-member');
+    $otherReader = announcementUser('group-member');
+    $first = Announcement::create(['title' => 'First', 'body' => 'Update', 'created_by' => $author->id]);
+    $second = Announcement::create(['title' => 'Second', 'body' => 'Update', 'created_by' => $author->id]);
+
+    Sanctum::actingAs($reader);
+    $this->getJson('/api/announcements/unread-count')->assertOk()->assertJsonPath('data.count', 2);
+    $this->getJson('/api/announcements')->assertOk();
+    $this->getJson('/api/announcements/unread-count')->assertJsonPath('data.count', 2);
+    $this->postJson("/api/announcements/{$first->id}/read")->assertOk();
+    $this->postJson("/api/announcements/{$first->id}/read")->assertOk();
+    $this->assertDatabaseCount('announcement_reads', 1);
+    $this->getJson('/api/announcements/unread-count')->assertJsonPath('data.count', 1);
+
+    Sanctum::actingAs($otherReader);
+    $this->getJson('/api/announcements/unread-count')->assertJsonPath('data.count', 2);
+
+    $second->delete();
+    Sanctum::actingAs($reader);
+    $this->getJson('/api/announcements/unread-count')->assertJsonPath('data.count', 0);
+    Announcement::create(['title' => 'New', 'body' => 'Update', 'created_by' => $author->id]);
+    $this->getJson('/api/announcements/unread-count')->assertJsonPath('data.count', 1);
+    $this->postJson('/api/announcements/999999/read')->assertNotFound();
+});
+
+test('guests cannot access announcement read tracking', function () {
+    $this->getJson('/api/announcements/unread-count')->assertUnauthorized();
+    $this->postJson('/api/announcements/1/read')->assertUnauthorized();
+});
