@@ -7,6 +7,7 @@ use App\Http\Controllers\Api\CategoryController;
 use App\Http\Controllers\Api\DashboardController;
 use App\Http\Controllers\Api\FeedbackController;
 use App\Http\Controllers\Api\OrganizationController;
+use App\Http\Controllers\Api\PasswordResetController;
 use App\Http\Controllers\Api\ProductController;
 use App\Http\Controllers\Api\SubcategoryController;
 use App\Http\Controllers\Api\UserController;
@@ -14,6 +15,8 @@ use App\Http\Controllers\RequestAccessController;
 use Illuminate\Support\Facades\Route;
 
 // Public
+Route::post('/forgot-password', [PasswordResetController::class, 'store'])->middleware('throttle:5,1');
+Route::post('/reset-password', [PasswordResetController::class, 'update'])->middleware('throttle:5,1');
 Route::post('/login', [AuthController::class, 'login'])->middleware('throttle:5,1');
 Route::post('/request-access', [RequestAccessController::class, 'store'])->middleware('throttle:5,1');
 
